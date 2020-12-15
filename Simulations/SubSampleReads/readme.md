@@ -1,3 +1,7 @@
 Start running the script "Pipeline.sh". 
-AllBamfiles are required to be in the same location. 
-Picard, samtools and Python are required.
+
+Requirements:
+  - Picard
+  - SAMtools
+  - Python
+  - All BAM/SAM files in the same location
