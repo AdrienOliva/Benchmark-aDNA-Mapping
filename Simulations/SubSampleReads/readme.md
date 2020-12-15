@@ -4,4 +4,4 @@ Requirements:
   - Picard
   - SAMtools
   - Python
-  - All BAM/SAM files in the same location
+  - All BAM/SAM files at the same location
