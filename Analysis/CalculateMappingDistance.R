@@ -1,5 +1,5 @@
 #set working directory
-setwd("/Users/adrien/Box/Adrien_simulations/Paper1_Adrien/lastBam/Dog/")
+setwd("sam/")
 
 #list all sam files
 ll <- list.files(pattern=".*sam")
@@ -21,61 +21,62 @@ for(l in ll){
    dt[, True.Chr:=gsub(":0|:1", "", ff$V3)]
    full.string <- stri_split(ff$V4, fixed="\t")
    dt[, Mapped.Chr:=sapply(full.string, "[", 3)]
-   #ss <- stri_split(sapply(full.string, "[", 1), fixed=":")
-   #dt[, True.Pos:=as.numeric(sapply(ss, "[", 2))]
-   #dt[, Mapped.Pos:=as.numeric(sapply(full.string, "[", 4))]
+   ss <- stri_split(sapply(full.string, "[", 1), fixed=":")
+   dt[, True.Pos:=as.numeric(sapply(ss, "[", 2))]
+   dt[, Mapped.Pos:=as.numeric(sapply(full.string, "[", 4))]
    dt[, MAPQ:=ff$V5]
-   #dt[, MAPQ:=as.numeric(sapply(full.string, "[", 5))]
-   #dt[, Strand:=sapply(ss, "[", 1)]
+   dt[, MAPQ:=as.numeric(sapply(full.string, "[", 5))]
+   dt[, Strand:=sapply(ss, "[", 1)]
+   #UDG treatment cutted each end of the reads so we adapt the positions
    #dt[which(Strand==0), Mapped.Pos:=as.numeric(Mapped.Pos-5)]
    #dt[which(Strand==1), Mapped.Pos:=as.numeric(Mapped.Pos+5)]
-   #dt[, Cigar:=sapply(full.string, "[", 6)]
-   #dt[, Seq:=sapply(full.string, "[", 10)]
-   #dt[, Read.Length:=nchar(sapply(full.string, "[", 10))]
+   dt[, Cigar:=sapply(full.string, "[", 6)]
+   dt[, Seq:=sapply(full.string, "[", 10)]
+   dt[, Read.Length:=nchar(sapply(full.string, "[", 10))]
    
    #add unique identifier (for multi-mapped reads)
    
    
    #clean up environment
-   #rm(list=ls()[!ls() %in% c("dt", "ll", "l", "start.time")])
+   rm(list=ls()[!ls() %in% c("dt", "ll", "l", "start.time")])
    
    #estimate distance between true and mapped read position
-   #dt[, Clip.Count:=stri_count(Cigar, regex="S|H")] # count number of clips
+   dt[, Clip.Count:=stri_count(Cigar, regex="S|H")] # count number of clips
    
    #read on forward strand with no clipping
-   #dt[Strand==0 & Mapped.Chr==True.Chr & Clip.Count==0, 
-   #   Mapped.Dist:=Mapped.Pos-True.Pos]
+   dt[Strand==0 & Mapped.Chr==True.Chr & Clip.Count==0, 
+      Mapped.Dist:=Mapped.Pos-True.Pos]
    
    #read on reverse strand with no clipping
-   #dt[Strand==1 & Mapped.Chr==True.Chr & Clip.Count==0, 
-   #   Mapped.Dist:=Mapped.Pos-(250-Read.Length)-True.Pos]
+   dt[Strand==1 & Mapped.Chr==True.Chr & Clip.Count==0, 
+      Mapped.Dist:=Mapped.Pos-(250-Read.Length)-True.Pos]
    
-   #if(dt[, any(Clip.Count>0)]){
-      #reads on foward strand with clipping
-   #   dt.for <- dt[Strand==0 & Mapped.Chr==True.Chr & Clip.Count>0]
-   #   rgx <- sapply(stri_split(dt.for[, Cigar], 
-    #                           regex="S|H"), "[", 1)
-    #  spp <- rgx %in% 1:1000
-     # pos.adj <- as.numeric(rgx[spp]) # adjustment due to clipping
+   if(dt[, any(Clip.Count>0)]){
+      reads on foward strand with clipping
+      dt.for <- dt[Strand==0 & Mapped.Chr==True.Chr & Clip.Count>0]
+      rgx <- sapply(stri_split(dt.for[, Cigar], 
+                               regex="S|H"), "[", 1)
+      spp <- rgx %in% 1:1000
+      pos.adj <- as.numeric(rgx[spp]) # adjustment due to clipping
       
-   #   dt[UnqID %in% dt.for[spp, UnqID], 
-    #     Mapped.Dist:=Mapped.Pos-pos.adj-True.Pos] # clipped from start of read
-     # dt[UnqID %in% dt.for[!spp, UnqID], 
-     #    Mapped.Dist:=Mapped.Pos-True.Pos] # clipped from end of read
+      dt[UnqID %in% dt.for[spp, UnqID], 
+         Mapped.Dist:=Mapped.Pos-pos.adj-True.Pos] # clipped from start of read
+      dt[UnqID %in% dt.for[!spp, UnqID], 
+         Mapped.Dist:=Mapped.Pos-True.Pos] # clipped from end of read
       
-      #reads on reverse strand with clipping
-      #dt.rev <- dt[Strand==1 & Mapped.Chr==True.Chr & Clip.Count>0]
-      #rgx <- sapply(stri_split(dt.rev[, Cigar], 
-         #                      regex="S|H"), "[", 1)
+      reads on reverse strand with clipping
+      dt.rev <- dt[Strand==1 & Mapped.Chr==True.Chr & Clip.Count>0]
+      rgx <- sapply(stri_split(dt.rev[, Cigar], 
+                               regex="S|H"), "[", 1)
       
-      #spp <- rgx %in% 1:1000
-      #pos.adj <- as.numeric(rgx[spp]) # adjustment due to clipping
+      spp <- rgx %in% 1:1000
+      pos.adj <- as.numeric(rgx[spp]) # adjustment due to clipping
       
-      #dt[UnqID %in% dt.rev[spp, UnqID], 
-      #   Mapped.Dist:=Mapped.Pos-(250-Read.Length)-pos.adj-True.Pos] # clipped from start of read
-      #dt[UnqID %in% dt.rev[!spp, UnqID], 
-      #   Mapped.Dist:=Mapped.Pos-(250-Read.Length)-True.Pos] # clipped from end of read
-   #}
+      dt[UnqID %in% dt.rev[spp, UnqID], 
+         Mapped.Dist:=Mapped.Pos-(250-Read.Length)-pos.adj-True.Pos] # clipped from start of read
+      dt[UnqID %in% dt.rev[!spp, UnqID], 
+         Mapped.Dist:=Mapped.Pos-(250-Read.Length)-True.Pos] # clipped from end of read
+   }
    
    #output file
    #out <- dt[order(True.Chr, True.Pos)]
