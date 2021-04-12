@@ -1,0 +1,2 @@
+- CreateReads: All scripts used to simulate the ancient DNA reads.
+- SubSampleReads: Pipeline used to subsample the simulated reads to have a read length that correspond at an aDNA read length distribution.
