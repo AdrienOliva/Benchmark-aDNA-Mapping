@@ -1,0 +1,2 @@
+- [Pipeline]-Create_aDNA_reads(Mitty).py: Pipeline used in this paper to produce the aDNA reads. This script requires Mitty (https://github.com/sbg/Mitty) and gargammel (https://github.com/grenaud/gargammel) to be installed and in your path.
+- gen_reads.sh: main script used to run Mitty. See Mitty's documentation for more info (https://github.com/sbg/Mitty).
