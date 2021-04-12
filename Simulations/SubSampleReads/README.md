@@ -3,5 +3,5 @@ Start running the script "Pipeline.sh". This script does subsample the mapped re
 Requirements:
   - Picard
   - SAMtools
-  - Python
+  - Python 3.7
   - All BAM/SAM files at the same location
